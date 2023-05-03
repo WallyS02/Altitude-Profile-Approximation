@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 path = os.path.dirname(os.path.abspath(__file__))
 pathData = os.path.join(path, "data")
 pathResults = os.path.join(path, "results")
+pathPlots = os.path.join(path, "plots")
 
 
 class Mode(Enum):
@@ -15,6 +16,10 @@ class Mode(Enum):
 
 
 MODE = Mode.SPLINES
+# tested sets length = 512
+skipped = [16, 42, 64, 85]
+# challenger - 260, chelm and everest - 8
+interpolation_distance_stamp = 260
 
 
 def Matrix(N):
@@ -150,6 +155,7 @@ def plots(results_i, results, name, actual_i, actual, intersects_i, intersects):
     plt.legend(["Interpolated profile", "Actual profile"])
     plt.title(name)
     plt.tight_layout()
+    plt.savefig(os.path.join(pathPlots, name + '.png'))
     plt.show()
 
 
@@ -173,7 +179,7 @@ def interpolation(nodes, mode, filename, nodes_number):
             file.write(str(i) + " " + str(result) + '\n')
             results_i.append(i)
             results.append(result)
-            i += 8
+            i += interpolation_distance_stamp
     intersects_i = []
     intersects = []
     with open(os.path.join(pathResults, filename + "_nodes.txt"), "w") as file:
@@ -198,7 +204,6 @@ def txt_to_csv(filename):
 
 
 def main():
-    skipped = [16, 40, 48, 80]
     for file in os.listdir(pathData):
         if os.path.isfile(os.path.join(pathData, file)):
             df = pd.read_csv(os.path.join(pathData, file), usecols=['Dystans', 'Wysokosc'])
@@ -214,11 +219,11 @@ def main():
                     j += skip
                 df_nodes = pd.concat([df_nodes, df.iloc[index_list]])
                 if MODE == Mode.LAGRANGE:
-                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.LAGRANGE, file + "_lagrange" + str(nodes_number), nodes_number)
-                    plots(results_i, results, file + "_lagrange" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
+                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.LAGRANGE, file.split('.')[0] + "_lagrange" + str(nodes_number), nodes_number)
+                    plots(results_i, results, file.split('.')[0] + "_lagrange" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
                 else:
-                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.SPLINES, file + "_splines" + str(nodes_number), nodes_number)
-                    plots(results_i, results, file + "_splines" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
+                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.SPLINES, file.split('.')[0] + "_splines" + str(nodes_number), nodes_number)
+                    plots(results_i, results, file.split('.')[0] + "_splines" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
 
 
 if __name__ == '__main__':
