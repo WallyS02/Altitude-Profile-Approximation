@@ -15,11 +15,11 @@ class Mode(Enum):
     SPLINES = 2
 
 
-MODE = Mode.SPLINES
+MODE = Mode.LAGRANGE
 # tested sets length = 512
 skipped = [16, 42, 64, 85]
 # challenger - 260, chelm and everest - 8
-interpolation_distance_stamp = 260
+interpolation_distance_stamp = 8
 
 
 def Matrix(N):
@@ -219,11 +219,17 @@ def main():
                     j += skip
                 df_nodes = pd.concat([df_nodes, df.iloc[index_list]])
                 if MODE == Mode.LAGRANGE:
-                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.LAGRANGE, file.split('.')[0] + "_lagrange" + str(nodes_number), nodes_number)
-                    plots(results_i, results, file.split('.')[0] + "_lagrange" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
+                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.LAGRANGE,
+                                                                                 file.split('.')[0] + "_lagrange" + str(
+                                                                                     nodes_number), nodes_number)
+                    plots(results_i, results, file.split('.')[0] + "_lagrange" + str(nodes_number),
+                          list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
                 else:
-                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.SPLINES, file.split('.')[0] + "_splines" + str(nodes_number), nodes_number)
-                    plots(results_i, results, file.split('.')[0] + "_splines" + str(nodes_number), list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
+                    results_i, results, intersects_i, intersects = interpolation(df_nodes, Mode.SPLINES,
+                                                                                 file.split('.')[0] + "_splines" + str(
+                                                                                     nodes_number), nodes_number)
+                    plots(results_i, results, file.split('.')[0] + "_splines" + str(nodes_number),
+                          list(df.loc[:, "Dystans"]), list(df.loc[:, "Wysokosc"]), intersects_i, intersects)
 
 
 if __name__ == '__main__':
