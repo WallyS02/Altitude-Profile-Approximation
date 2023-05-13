@@ -1,8 +1,8 @@
-import copy
 import pandas as pd
 import os
 from enum import Enum
 import matplotlib.pyplot as plt
+from scipy.linalg import lu_solve, lu_factor
 
 path = os.path.dirname(os.path.abspath(__file__))
 pathData = os.path.join(path, "data")
@@ -30,58 +30,6 @@ def Matrix(N):
             line.append(0)
         M.append(line)
     return M
-
-
-def pivoting(U, L, P, i):
-    pivot = abs(U[i][i])
-    pivot_idx = i
-    for j in range(i + 1, len(U)):
-        if abs(U[j][i]) > pivot:
-            pivot = abs(U[j][i])
-            pivot_idx = j
-    if pivot_idx != i:
-        for j in range(len(U)):
-            if j >= i:
-                U[i][j], U[pivot_idx][j] = U[pivot_idx][j], U[i][j]
-            else:
-                L[i][j], L[pivot_idx][j] = L[pivot_idx][j], L[i][j]
-            P[i][j], P[pivot_idx][j] = P[pivot_idx][j], P[i][j]
-    return U, L, P
-
-
-def LU(A, b):
-    N = len(b)
-    L = Matrix(N)
-    P = Matrix(N)
-    U = copy.deepcopy(A)
-    x = [1] * N
-    for i in range(N):
-        for j in range(N):
-            if i == j:
-                L[i][j] = P[i][j] = 1
-    for i in range(N - 1):
-        U, L, P = pivoting(U, L, P, i)
-        for j in range(i + 1, N):
-            L[j][i] = U[j][i] / U[i][i]
-            for k in range(i, N):
-                U[j][k] = U[j][k] - L[j][i] * U[i][k]
-    result = [0] * len(P)
-    for i, row in enumerate(P):
-        res = sum(row[j] * b[j] for j in range(N))
-        result[i] = res
-    b = result
-    y = [0] * N
-    for i in range(N):
-        S = 0
-        for j in range(i):
-            S += L[i][j] * y[j]
-        y[i] = (b[i] - S) / L[i][i]
-    for i in range(N - 1, -1, -1):
-        S = 0
-        for j in range(i + 1, N):
-            S += U[i][j] * x[j]
-        x[i] = (y[i] - S) / U[i][i]
-    return x
 
 
 def splines(nodes, i, nodes_number):
@@ -120,7 +68,7 @@ def splines(nodes, i, nodes_number):
         A[4 * k + 3][4 * (k - 1) + 3] = 6 * h
         A[4 * k + 3][4 * k + 2] = -2
         b[4 * k + 3] = 0
-    x = LU(A, b)
+    x = lu_solve(lu_factor(A), b)
     altitude = 0.0
     for k in range(nodes_number - 1):
         altitude = 0.0
